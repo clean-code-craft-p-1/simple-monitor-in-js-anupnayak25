@@ -7,21 +7,14 @@ async function displayLoading() {
   }
 }
 
-function checkTemperature(temperature) {
-  if (temperature < 95 || temperature > 102) {
-    return "Temperature is critical!";
+function getAlertMessage(value, min, max, message) {
+  if (value < min || value > max) {
+    return message;
   }
   return null;
 }
 
-function checkPulseRate(pulseRate) {
-  if (pulseRate < 60 || pulseRate > 100) {
-    return "Pulse Rate is out of range!";
-  }
-  return null;
-}
-
-function checkSpo2(spo2) {
+function getSpo2AlertMessage(spo2) {
   if (spo2 < 90) {
     return "Oxygen Saturation out of range!";
   }
@@ -29,7 +22,9 @@ function checkSpo2(spo2) {
 }
 
 export function validateVitals(temperature, pulseRate, spo2) {
-  return checkTemperature(temperature) || checkPulseRate(pulseRate) || checkSpo2(spo2);
+  return getAlertMessage(temperature,95,102,"Temperature is critical!") || 
+  getAlertMessage(pulseRate,60,100,"Pulse Rate is out of range!") || 
+  getSpo2AlertMessage(spo2);
 }
 
 export async function vitalsOk(temperature, pulseRate, spo2) {
