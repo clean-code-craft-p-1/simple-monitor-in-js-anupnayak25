@@ -21,7 +21,7 @@ describe('vitals checker', function () {
     expect(await vitalsOk(98.1, 70, 89)).to.be.false;
   });
 
-  it('returns validation messages', function () {
+  it('returns out of bound messages', function () {
     expect(validateVitals(94, 70, 98)).to.equal("Temperature is critical!");
     expect(validateVitals(103, 70, 98)).to.equal("Temperature is critical!");
     expect(validateVitals(98.1, 59, 98)).to.equal("Pulse Rate is out of range!");
