@@ -7,6 +7,10 @@ async function displayLoading() {
   }
 }
 
+function calculateMeanArterialPressure(systolic, diastolic ) {
+    return (2 * diastolic + systolic) / 3;
+}
+
 function getAlertMessage(value, min, max, message) {
   if (value < min || value > max) {
     return message;
@@ -21,14 +25,33 @@ function getSpo2AlertMessage(spo2) {
   return null;
 }
 
-export function validateVitals(temperature, pulseRate, spo2) {
-  return getAlertMessage(temperature,95,102,"Temperature is critical!") || 
-  getAlertMessage(pulseRate,60,100,"Pulse Rate is out of range!") || 
-  getSpo2AlertMessage(spo2);
+export function validateVitals(temperature, pulseRate, spo2, bloodPressure) {
+  const vitalsChecks = [
+    getAlertMessage(temperature, 95, 102, "Temperature is critical!"),
+    getAlertMessage(pulseRate, 60, 100, "Pulse Rate is out of range!"),
+    getAlertMessage(
+      calculateMeanArterialPressure(
+        bloodPressure.systolic,
+        bloodPressure.diastolic
+      ),
+      65,
+      100,
+      "Blood Pressure is out of range!"
+    ),
+    getSpo2AlertMessage(spo2),
+  ];
+
+  for (const alert of vitalsChecks) {
+    if (alert) {
+      return alert;
+    }
+  }
+
+  return null;
 }
 
-export async function vitalsOk(temperature, pulseRate, spo2) {
-  const error = validateVitals(temperature, pulseRate, spo2);
+export async function vitalsOk(temperature, pulseRate, spo2, bloodPressure) {
+  const error = validateVitals(temperature, pulseRate, spo2, bloodPressure);
   if (error) {
     console.log(error);
     await displayLoading();
