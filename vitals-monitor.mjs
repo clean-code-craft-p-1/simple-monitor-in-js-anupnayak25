@@ -1,31 +1,60 @@
+async function displayLoading() {
+  for (let i = 0; i < 6; i++) {
+    process.stdout.write("\r* ");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    process.stdout.write("\r *");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+}
 
-export async function vitalsOk(temperature, pulseRate, spo2) {
-  if (temperature > 102 || temperature < 95) {
-    console.log("Temperature is critical!");
-    for (let i = 0; i < 6; i++) {
-      process.stdout.write("\r* ");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      process.stdout.write("\r *");
-      await new Promise(resolve => setTimeout(resolve, 1000));
+function calculateMeanArterialPressure(systolic, diastolic ) {
+    return (2 * diastolic + systolic) / 3;
+}
+
+function getAlertMessage(value, min, max, message) {
+  if (value < min || value > max) {
+    return message;
+  }
+  return null;
+}
+
+function getSpo2AlertMessage(spo2) {
+  if (spo2 < 90) {
+    return "Oxygen Saturation out of range!";
+  }
+  return null;
+}
+
+export function validateVitals(temperature, pulseRate, spo2, bloodPressure) {
+  const vitalsChecks = [
+    getAlertMessage(temperature, 95, 102, "Temperature is critical!"),
+    getAlertMessage(pulseRate, 60, 100, "Pulse Rate is out of range!"),
+    getAlertMessage(
+      calculateMeanArterialPressure(
+        bloodPressure.systolic,
+        bloodPressure.diastolic
+      ),
+      65,
+      100,
+      "Blood Pressure is out of range!"
+    ),
+    getSpo2AlertMessage(spo2),
+  ];
+
+  for (const alert of vitalsChecks) {
+    if (alert) {
+      return alert;
     }
-    return false;
-  } else if (pulseRate < 60 || pulseRate > 100) {
-    console.log("Pulse Rate is out of range!");
-    for (let i = 0; i < 6; i++) {
-      process.stdout.write("\r* ");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      process.stdout.write("\r *");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-    return false;
-  } else if (spo2 < 90) {
-    console.log("Oxygen Saturation out of range!");
-    for (let i = 0; i < 6; i++) {
-      process.stdout.write("\r* ");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      process.stdout.write("\r *");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+  }
+
+  return null;
+}
+
+export async function vitalsOk(temperature, pulseRate, spo2, bloodPressure) {
+  const error = validateVitals(temperature, pulseRate, spo2, bloodPressure);
+  if (error) {
+    console.log(error);
+    await displayLoading();
     return false;
   }
   return true;
